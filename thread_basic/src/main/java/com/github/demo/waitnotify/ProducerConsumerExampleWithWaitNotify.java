@@ -11,8 +11,11 @@ public class ProducerConsumerExampleWithWaitNotify {
         List<Integer> taskQueue = new LinkedList<Integer>();
         int MAX_CAPACITY = 5;
         Thread tProducer = new Thread(new Producer(taskQueue, MAX_CAPACITY), "producer");
-        Thread tConsumer = new Thread(new Consumer(taskQueue), "consumer");
-        tConsumer.start();
+        Thread tConsumer1 = new Thread(new Consumer(taskQueue), "consumer1");
+        Thread tConsumer2 = new Thread(new Consumer(taskQueue), "consumer2");
+
+        tConsumer1.start();
+        tConsumer2.start();
         tProducer.start();
     }
 }
