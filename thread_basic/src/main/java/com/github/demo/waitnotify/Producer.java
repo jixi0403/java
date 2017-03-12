@@ -35,7 +35,7 @@ public class Producer implements Runnable {
             Thread.sleep(1000);
             taskQueue.add(i);
             System.out.println("Produce: " + i);
-            taskQueue.notify();
+            taskQueue.notifyAll();
         }
     }
 }

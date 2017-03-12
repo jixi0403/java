@@ -12,18 +12,6 @@ public class Consumer implements Runnable {
         this.taskQueue = taskQueue;
     }
 
-
-    /**
-     * When an object implementing interface <code>Runnable</code> is used
-     * to create a thread, starting the thread causes the object's
-     * <code>run</code> method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method <code>run</code> is that it may
-     * take any action whatsoever.
-     *
-     * @see Thread#run()
-     */
     public void run() {
         try {
             while(true) {
@@ -44,7 +32,7 @@ public class Consumer implements Runnable {
 
             Thread.sleep(1000);
             int i = taskQueue.remove(0);
-            System.out.println("Consumed: " + i);
+            System.out.println(Thread.currentThread().getName() + " consumed: " + i);
             taskQueue.notify();
         }
     }
