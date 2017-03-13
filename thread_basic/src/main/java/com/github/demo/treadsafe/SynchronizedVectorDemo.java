@@ -1,4 +1,8 @@
-package com.github.demo.threadsafe;
+package com.github.demo.treadsafe;
+
+import com.github.common.ThreadSafe;
+
+import java.util.Vector;
 
 public class SynchronizedVectorDemo {
 
@@ -13,8 +17,8 @@ public class SynchronizedVectorDemo {
 	@ThreadSafe
 	public static void deleteLast(Vector list) {
 		synchronized(list) {
-			int lastIndex = list.size()) - 1;
-			return list.remove(lastIndex);
+			int lastIndex = list.size() - 1;
+			list.remove(lastIndex);
 		}
 	}
 

@@ -14,5 +14,11 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.0.29.Final</version>
+        </dependency>
     </dependencies>
 </project>
