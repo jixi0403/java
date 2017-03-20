@@ -8,6 +8,7 @@
     <artifactId>thread_basic</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
