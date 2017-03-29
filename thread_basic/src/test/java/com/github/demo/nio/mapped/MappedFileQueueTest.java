@@ -3,6 +3,8 @@ package com.github.demo.nio.mapped;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Created by error on 2017/3/16.
  */
@@ -15,7 +17,7 @@ public class MappedFileQueueTest {
 
     @Test
     public void testLoad() {
-        mappedFileQueue.load();
+        assertTrue(mappedFileQueue.load());
     }
 
 }

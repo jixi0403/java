@@ -14,7 +14,6 @@ public class LifecycleWebServer {
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public void start(String[] args) throws IOException {
-
         final ServerSocket server = new ServerSocket(80);
 
         while(true) {
