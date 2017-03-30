@@ -1,9 +1,9 @@
 package com.github.demo.configuration.zookeeper;
 
 import com.github.configuration.zookeeper.CuratorZookeeperClient;
+import com.github.configuration.zookeeper.EventListener;
 import com.netflix.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher.Event.EventType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,17 +116,29 @@ class NodeStateChangeWatcher implements CuratorWatcher {
     }
 
     public void process(WatchedEvent watchedEvent) throws Exception {
-        EventType eventType = watchedEvent.getType();
+        client.addWatcher(watchedEvent.getPath(), this);
 
         System.out.println(watchedEvent.getPath() + ',' + watchedEvent.getType());
-        switch(eventType) {
+        switch(watchedEvent.getType()) {
         case NodeDataChanged:
             System.out.println("^_^, " + new String(client.getData(watchedEvent.getPath())));
             break;
             default:
-                System.out.println("I don't care about this event type." + eventType);
+                System.out.println("I don't care about this event type." + watchedEvent.getType());
         }
+    }
+}
 
-        client.addWatcher(watchedEvent.getPath(), this);
+class PropertiesEventListener implements EventListener {
+
+    public void process(WatchedEvent event) {
+        System.out.println(event.getPath() + ',' + event.getType());
+        switch(event.getType()) {
+        case NodeDataChanged:
+            System.out.println("^_^, " + new String());
+            break;
+        default:
+            System.out.println("I don't care about this event type." + event.getType());
+        }
     }
 }
