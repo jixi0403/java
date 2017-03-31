@@ -3,6 +3,8 @@ package com.github.demo.configuration.util;
 import com.github.annotation.ConfigRoot;
 import com.github.annotation.DisConfigField;
 import com.github.configuration.util.ReflectionWrapper;
+import com.github.configuration.zookeeper.CuratorZookeeperClient;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -22,28 +24,41 @@ public class ReflectionWrapperTest {
     public static final String FloatCanonicalName1 = Float.class.getCanonicalName();
     public static final String FloatCanonicalName2 = float.class.getCanonicalName();
 
-    ReflectionWrapper wrapper = new ReflectionWrapper("com.github.configuration.common");
+    private ReflectionWrapper wrapper = new ReflectionWrapper("com.github.configuration.common");
+    private CuratorZookeeperClient zkClient = new CuratorZookeeperClient("127.0.0.1:2181");
+    private String hostPath = "/dianfuketang/dianfu-web/redis/host";
+    private String portPath = "/dianfuketang/dianfu-web/redis/port";
+    @Before
+    public void setup() {
+        //zk
+        zkClient.createPersist(hostPath);
+        zkClient.createPersist(portPath);
+        zkClient.setData(hostPath, "192.168.2.121".getBytes());
+        zkClient.setData(portPath, "212121".getBytes());
+    }
 
     @Test
     public void testLoadClasses() throws IllegalAccessException, InstantiationException {
+        String root = "/root";
         Set<Class<?>> classSet = wrapper.getTypesAnnotateWith(ConfigRoot.class);
         for(Class<?> clazz : classSet) {
+            ConfigRoot configRoot = clazz.getAnnotation(ConfigRoot.class);
+            String rootPath = configRoot.root();
+            String redisPath = root + CuratorZookeeperClient.ZK_PATH_SEPARATOR + rootPath;
             Object obj = clazz.newInstance();
             Set<Field> fieldSet = wrapper.getFieldsAnnotatedWith(clazz, DisConfigField.class);
             for(Field f : fieldSet) {
-                System.out.println(f.getName());
                 DisConfigField fieldConfig = f.getAnnotation(DisConfigField.class);
                 String remoteFieldName = fieldConfig.field();
-                System.out.println(remoteFieldName);
                 f.setAccessible(true);
-                //f.set(obj, "s");
-                System.out.println(f.getType());
                 String type = getCanonicalName(f.getType());
+                String finalPath = redisPath + CuratorZookeeperClient.ZK_PATH_SEPARATOR + remoteFieldName;
+                byte[] dataBytes = zkClient.getData(finalPath);
 
                 if(type.equals(stringCanonicalName)) {
-                    f.set(obj, String.valueOf("1111"));
+                    f.set(obj, new String(dataBytes));
                 } else if(type.equals(IntegerCanonicalName1) || type.equals(IntegerCanonicalName2)) {
-                    f.set(obj, Integer.parseInt("1111"));
+                    f.set(obj, Integer.parseInt(new String(dataBytes)));
                 }
             }
 

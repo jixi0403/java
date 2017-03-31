@@ -1,48 +1,62 @@
 package com.github.configuration.zookeeper;
 
-import com.netflix.curator.framework.CuratorFramework;
-import com.netflix.curator.framework.CuratorFrameworkFactory;
-import com.netflix.curator.framework.CuratorFrameworkFactory.Builder;
-import com.netflix.curator.framework.api.CuratorWatcher;
-import com.netflix.curator.framework.state.ConnectionState;
-import com.netflix.curator.framework.state.ConnectionStateListener;
-import com.netflix.curator.retry.RetryNTimes;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.CuratorFrameworkFactory.Builder;
+import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
+import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.data.Stat;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Created by error on 2017/3/29.
  */
 public class CuratorZookeeperClient {
-
+    public static final String ZK_PATH_SEPARATOR = "/";
     private CuratorFramework client;
+
+    private final Set<StateListener> stateListeners = new CopyOnWriteArraySet<StateListener>();
 
     public CuratorZookeeperClient(String address) {
         Builder builder = CuratorFrameworkFactory.builder().connectString(address)
-                .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))
-                .connectionTimeoutMs(5000);
-
-        try {
-            this.client = builder.build();
-            this.client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
-                public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
-                    if(connectionState == ConnectionState.LOST) {
-                        System.out.println("Connection lost");
-                    } else if(connectionState == ConnectionState.CONNECTED) {
-                        System.out.println("Connection connected");
-                    } else if(connectionState == ConnectionState.RECONNECTED) {
-                        System.out.println("Connection reconnected");
-                    }
+                                                 .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 3000))
+                                                 .connectionTimeoutMs(5000);
+        this.client = builder.build();
+        this.client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+            public void stateChanged(CuratorFramework curatorFramework, ConnectionState connectionState) {
+                CustomConnectionState state = CustomConnectionState.INVALID;
+                if(connectionState == ConnectionState.LOST) {
+                    System.out.println("Connection lost");
+                    state = CustomConnectionState.DISCONNECTED;
+                } else if(connectionState == ConnectionState.CONNECTED) {
+                    System.out.println("Connection connected");
+                    state = CustomConnectionState.CONNECTED;
+                } else if(connectionState == ConnectionState.RECONNECTED) {
+                    System.out.println("Connection reconnected");
+                    state = CustomConnectionState.RECONNECT;
                 }
-            });
-            this.client.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+                CuratorZookeeperClient.this.stateChanged(state);
+            }
+        });
+        this.client.start();
+    }
+
+    public void stateChanged(CustomConnectionState state) {
+        for(StateListener stateListener : stateListeners) {
+            stateListener.stateChanged(state);
         }
+    }
+
+    public void addStateListener(StateListener listener) {
+        stateListeners.add(listener);
     }
 
     /**
@@ -50,10 +64,30 @@ public class CuratorZookeeperClient {
      * @param path 节点路径
      */
     public void createPersist(String path) {
-        try {
-            client.create().forPath(path);
-        } catch (Exception e) {
-            e.printStackTrace();
+        doCreateNode(path, false);
+    }
+
+    private void doCreateNode(String path, boolean isEphemeral) {
+        if(path == null) {
+            return;
+        }
+
+        String[] paths = path.split(CuratorZookeeperClient.ZK_PATH_SEPARATOR);
+        String fullPath = "";
+        for(String nodePath : paths) {
+            if(nodePath.equals("")) {
+                continue;
+            }
+
+            fullPath += CuratorZookeeperClient.ZK_PATH_SEPARATOR;
+            fullPath += nodePath;
+            if(!checkNodeExisting(fullPath)) {
+                try {
+                    client.create().withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT).forPath(fullPath);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -61,12 +95,8 @@ public class CuratorZookeeperClient {
      * 创建一个临时节点
      * @param path 节点路径
      */
-    public void createEmphemeral(String path) {
-        try {
-            client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void createEphemeral(String path) {
+        doCreateNode(path, true);
     }
 
     /**
@@ -136,6 +166,11 @@ public class CuratorZookeeperClient {
         }
 
         return null;
+    }
+
+    public void addListener(String path, EventListener listener) {
+        CuratorWatcher watcher = new CuratorWatcherImpl(this, listener);
+        addWatcher(path, watcher);
     }
 
     /**

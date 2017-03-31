@@ -2,7 +2,7 @@ package com.github.demo.configuration.zookeeper;
 
 import com.github.configuration.zookeeper.CuratorZookeeperClient;
 import com.github.configuration.zookeeper.EventListener;
-import com.netflix.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
 import org.junit.After;
 import org.junit.Before;
@@ -36,6 +36,18 @@ public class CuratorZookeeperClientTest {
             client.createPersist(nodeExisting);
         }
 
+    }
+
+    @Test
+    public void testCreateEphemeral() {
+        String root = "/";
+        client.createPersist(root);
+
+        String testMultiLevelHost = "/root/redis/host";
+        client.createPersist(testMultiLevelHost);
+
+        String testMultiLevelPort = "/root/redis/port";
+        client.createPersist(testMultiLevelPort);
     }
 
     @Test
@@ -131,7 +143,7 @@ class NodeStateChangeWatcher implements CuratorWatcher {
 
 class PropertiesEventListener implements EventListener {
 
-    public void process(WatchedEvent event) {
+    public void process(CuratorZookeeperClient client, WatchedEvent event) {
         System.out.println(event.getPath() + ',' + event.getType());
         switch(event.getType()) {
         case NodeDataChanged:

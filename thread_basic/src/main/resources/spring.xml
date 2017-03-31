@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+
+
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+
+
+
+
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<context:component-scan base-package="com.github"></context:component-scan>
+	<context:annotation-config />
+
+	<bean id="configurationBean" class="com.github.configuration.spring.ConfigurationBean">
+			<property name="production" value="/dianfuketang"/>
+			<property name="app" value="dianfu-web"/>
+			<property name="scanPackage" value="com.github.configuration.common"/>
+			<property name="host" value="127.0.0.1"/>
+			<property name="port" value="2181"/>
+	</bean>
+</beans>

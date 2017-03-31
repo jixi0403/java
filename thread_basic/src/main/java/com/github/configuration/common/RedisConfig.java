@@ -8,9 +8,9 @@ import com.github.annotation.DisConfigField;
  */
 @ConfigRoot(root = "redis")
 public class RedisConfig {
-    @DisConfigField(field = "remote_host")
+    @DisConfigField(field = "host")
     private String host;
-    @DisConfigField(field = "remote_port")
+    @DisConfigField(field = "port")
     private int port;
 
     public String getHost() {

@@ -1,6 +1,6 @@
 package com.github.configuration.zookeeper;
 
-import com.netflix.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
 
 /**
@@ -17,6 +17,6 @@ public class CuratorWatcherImpl implements CuratorWatcher {
 
     public void process(WatchedEvent watchedEvent) throws Exception {
         client.addWatcher(watchedEvent.getPath(), this);
-        eventListener.process(watchedEvent);
+        eventListener.process(client, watchedEvent);
     }
 }
