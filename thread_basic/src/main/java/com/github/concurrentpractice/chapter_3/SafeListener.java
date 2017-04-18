@@ -1,4 +1,4 @@
-package com.github.concurrentpractice.chapter_three;
+package com.github.concurrentpractice.chapter_3;
 
 /**
  * 使用工厂方法防止this引用在构造过程中溢出

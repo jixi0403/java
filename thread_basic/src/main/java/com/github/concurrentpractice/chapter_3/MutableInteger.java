@@ -1,4 +1,4 @@
-package com.github.concurrentpractice.chapter_three;
+package com.github.concurrentpractice.chapter_3;
 
 /**
  * 非线程安全

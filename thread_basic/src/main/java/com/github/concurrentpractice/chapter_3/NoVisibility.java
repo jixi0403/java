@@ -1,4 +1,4 @@
-package com.github.concurrentpractice.chapter_three;
+package com.github.concurrentpractice.chapter_3;
 
 /**
  * 1、NoVisibility可能会持续循环下去，因为读线程可能永远看不到ready的值。
