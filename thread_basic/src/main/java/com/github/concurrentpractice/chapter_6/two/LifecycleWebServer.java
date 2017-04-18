@@ -1,4 +1,4 @@
-package com.github.concurrentpractice.chapter_six.two;
+package com.github.concurrentpractice.chapter_6.two;
 
 import java.io.IOException;
 import java.net.ServerSocket;

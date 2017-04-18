@@ -1,4 +1,4 @@
-package com.github.concurrentpractice.chapter_six.one;
+package com.github.concurrentpractice.chapter_6.one;
 
 import java.util.concurrent.Executor;
 
